@@ -1,24 +1,3 @@
-"""
-Data quality report for the ConsultBae pipeline.
-
-Walks the pipeline end to end and reports on data health at each
-stage:
-
-    1. RAW SOURCE FILES     data/*.csv
-    2. CLEANING IMPACT       data/*.csv          vs data/cleaned/*.csv
-    3. MATCHING QUALITY      data/matched/matching_results.csv
-    4. DATABASE INTEGRITY    live Postgres (persons, source_records,
-                              audio_submissions) -- skipped with a
-                              clear note if the DB isn't reachable
-
-Run from the project root:
-    python3 reports/data_quality.py
-
-Prints a readable report to the console AND saves a timestamped
-copy under reports/output/. Exits with status code 1 if any
-CRITICAL issues were found (useful for CI / cron alerting), 0
-otherwise.
-"""
 
 import sys
 from datetime import datetime
@@ -69,12 +48,7 @@ def section(title):
 # ============================================================
 
 def find_column(df, possible_names):
-    """Same lightweight column-detection approach as clean_data.py,
-    duplicated here rather than imported so this report can run
-    standalone even if scripts/ changes shape later. Normalizes
-    spaces to underscores before comparing, since raw headers like
-    'Full Name' or 'Phone Number' need to match aliases written as
-    'full_name' / 'phone_number'."""
+  
     columns = {
         str(c).strip().lower().replace(" ", "_"): c
         for c in df.columns
@@ -247,10 +221,6 @@ def report_matching_quality():
                               "phone", "match_score", "match_reason"] if c in df.columns]
         line(medium_confidence[cols].to_string(index=False))
 
-    # How many sources contributed to each person -- the whole point
-    # of the matching step is finding the SAME person across sources,
-    # so a healthy pipeline should show a good chunk of persons with
-    # sources > 1.
     sources_per_person = df.groupby("person_id")["source_system"].nunique()
     single_source = (sources_per_person == 1).sum()
     multi_source = (sources_per_person > 1).sum()
@@ -269,9 +239,6 @@ def report_matching_quality():
                 "is too strict (or normalization upstream is inconsistent).",
             )
 
-    # match_score distribution, excluding rows that don't carry a
-    # meaningful score (BASE_RECORD/NEW_PERSON use 0 as a placeholder,
-    # not an actual similarity score).
     scored = df[~df["match_type"].isin(["BASE_RECORD", "NEW_PERSON"])]
     if len(scored) > 0 and "match_score" in scored.columns:
         line("\nMatch score distribution (matched records only):")
@@ -279,8 +246,6 @@ def report_matching_quality():
         line(f"  mean : {scored['match_score'].mean():.1f}")
         line(f"  max  : {scored['match_score'].max():.1f}")
 
-    # Records missing both email and phone can never be matched to
-    # anyone else -- they'll always end up as their own isolated person.
     if "email" in df.columns and "phone" in df.columns:
         unmatchable = df[df["email"].isna() & df["phone"].isna()]
         if len(unmatchable) > 0:
@@ -293,7 +258,7 @@ def report_matching_quality():
 
 
 # ============================================================
-# 4. DATABASE INTEGRITY (live Postgres, optional)
+# 4. DATABASE INTEGRITY (live Postgres)
 # ============================================================
 
 def report_database_integrity():
@@ -347,11 +312,7 @@ def report_database_integrity():
             line(f"source_records rows    : {source_records_count}")
             line(f"audio_submissions rows : {audio_count}")
 
-            # --- duplicate emails/phones in persons ---
-            # After a fresh ingest_to_db.py run this should always be
-            # zero -- the whole point of the matching step upstream is
-            # to collapse duplicates BEFORE they reach this table. Any
-            # duplicates here mean the matching logic missed something.
+   
             cur.execute(
                 """
                 SELECT email, COUNT(*) FROM persons
@@ -470,10 +431,6 @@ def report_summary():
         for msg in messages:
             line(f"  - {msg}")
 
-
-# ============================================================
-# MAIN
-# ============================================================
 
 def main():
     line("CONSULTBAE DATA QUALITY REPORT")

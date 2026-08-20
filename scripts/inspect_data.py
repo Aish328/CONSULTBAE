@@ -1,17 +1,8 @@
 from pathlib import Path
 import pandas as pd
 
-
-# ============================================================
-# CONFIGURATION
-# ============================================================
-
 DATA_DIR = Path("data")
 
-
-# ============================================================
-# HELPER FUNCTIONS
-# ============================================================
 
 def print_section(title):
     print("\n" + "=" * 80)
@@ -22,19 +13,11 @@ def print_section(title):
 def inspect_file(file_path):
     print_section(f"FILE: {file_path.name}")
 
-    # --------------------------------------------------------
-    # LOAD DATA
-    # --------------------------------------------------------
-
     try:
         df = pd.read_csv(file_path)
     except Exception as e:
         print(f"ERROR reading file: {e}")
         return
-
-    # --------------------------------------------------------
-    # BASIC INFORMATION
-    # --------------------------------------------------------
 
     print_section("1. BASIC INFORMATION")
 
@@ -43,10 +26,7 @@ def inspect_file(file_path):
     print(f"Columns         : {len(df.columns)}")
     print(f"Memory usage    : {df.memory_usage(deep=True).sum() / 1024:.2f} KB")
 
-    # --------------------------------------------------------
-    # COLUMN INFORMATION
-    # --------------------------------------------------------
-
+  
     print_section("2. COLUMNS")
 
     for i, column in enumerate(df.columns, start=1):
@@ -55,17 +35,10 @@ def inspect_file(file_path):
             f"{i:2}. {column}"
         )
 
-    # --------------------------------------------------------
-    # DATA TYPES
-    # --------------------------------------------------------
 
     print_section("3. DATA TYPES")
 
     print(df.dtypes.to_string())
-
-    # --------------------------------------------------------
-    # MISSING VALUES
-    # --------------------------------------------------------
 
     print_section("4. MISSING VALUES")
 
@@ -94,10 +67,6 @@ def inspect_file(file_path):
             missing_report.to_string()
         )
 
-    # --------------------------------------------------------
-    # EXACT DUPLICATE ROWS
-    # --------------------------------------------------------
-
     print_section("5. EXACT DUPLICATE ROWS")
 
     duplicate_count = df.duplicated().sum()
@@ -120,10 +89,6 @@ def inspect_file(file_path):
             )
         )
 
-    # --------------------------------------------------------
-    # UNIQUE VALUES
-    # --------------------------------------------------------
-
     print_section("6. UNIQUE VALUES PER COLUMN")
 
     for column in df.columns:
@@ -137,10 +102,6 @@ def inspect_file(file_path):
             f"{unique_count} unique values"
         )
 
-    # --------------------------------------------------------
-    # SAMPLE DATA
-    # --------------------------------------------------------
-
     print_section("7. FIRST 5 ROWS")
 
     print(
@@ -149,10 +110,7 @@ def inspect_file(file_path):
         )
     )
 
-    # --------------------------------------------------------
-    # LAST 5 ROWS
-    # --------------------------------------------------------
-
+ 
     print_section("8. LAST 5 ROWS")
 
     print(
@@ -161,10 +119,7 @@ def inspect_file(file_path):
         )
     )
 
-    # --------------------------------------------------------
-    # POTENTIAL NAME / EMAIL / PHONE COLUMNS
-    # --------------------------------------------------------
-
+ 
     print_section("9. POTENTIAL PERSON IDENTIFIER COLUMNS")
 
     possible_name_columns = [
@@ -232,10 +187,7 @@ def inspect_file(file_path):
         f"Phone columns : {found_phones}"
     )
 
-    # --------------------------------------------------------
-    # DUPLICATES IN POTENTIAL IDENTIFIER COLUMNS
-    # --------------------------------------------------------
-
+ 
     print_section(
         "10. DUPLICATES IN IDENTIFIER COLUMNS"
     )
@@ -284,9 +236,6 @@ def inspect_file(file_path):
                     .to_string()
                 )
 
-    # --------------------------------------------------------
-    # EMPTY STRING CHECK
-    # --------------------------------------------------------
 
     print_section("11. EMPTY STRING VALUES")
 
@@ -308,10 +257,6 @@ def inspect_file(file_path):
                     f"{column}: "
                     f"{empty_count} empty strings"
                 )
-
-    # --------------------------------------------------------
-    # WHITESPACE ISSUES
-    # --------------------------------------------------------
 
     print_section("12. WHITESPACE ISSUES")
 
@@ -339,10 +284,7 @@ def inspect_file(file_path):
                     f"{trailing_spaces} trailing-space values"
                 )
 
-    # --------------------------------------------------------
-    # SUMMARY
-    # --------------------------------------------------------
-
+  
     print_section("13. SUMMARY")
 
     print(f"Total rows              : {len(df)}")
@@ -356,9 +298,6 @@ def inspect_file(file_path):
     print("\nInspection completed.")
 
 
-# ============================================================
-# MAIN
-# ============================================================
 
 def main():
 
@@ -392,9 +331,6 @@ def main():
         inspect_file(file_path)
 
 
-# ============================================================
-# ENTRY POINT
-# ============================================================
 
 if __name__ == "__main__":
     main()

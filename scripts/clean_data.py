@@ -4,26 +4,15 @@ from pathlib import Path
 import pandas as pd
 
 
-# ============================================================
-# CONFIG
-# ============================================================
-
 INPUT_DIR = Path(r"C:\Users\Lenovo\Desktop\consultbae_updated\consultbae\data")
 OUTPUT_DIR = Path(r"C:\Users\Lenovo\Desktop\consultbae_updated\consultbae\data\cleaned")
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# ============================================================
-# BASIC CLEANING
-# ============================================================
 
 def clean_string(value):
-    """
-    Remove leading/trailing whitespace and
-    collapse multiple spaces.
-    """
-
+  
     if pd.isna(value):
         return None
 
@@ -36,19 +25,9 @@ def clean_string(value):
 
     return value
 
-
-# ============================================================
-# NAME NORMALIZATION
-# ============================================================
-
+"""Normalization"""
 def normalize_name(value):
-    """
-    Example:
-
-        '  JOHN   SMITH  '
-                ↓
-        'john smith'
-    """
+   
 
     value = clean_string(value)
 
@@ -56,17 +35,9 @@ def normalize_name(value):
         return None
 
     return value.lower()
-
-
-# ============================================================
-# EMAIL NORMALIZATION
-# ============================================================
 
 def normalize_email(value):
-    """
-    Normalize email for matching.
-    """
-
+    
     value = clean_string(value)
 
     if value is None:
@@ -74,26 +45,8 @@ def normalize_email(value):
 
     return value.lower()
 
-
-# ============================================================
-# PHONE NORMALIZATION
-# ============================================================
-
 def normalize_phone(value):
-    """
-    Keep only digits.
-
-    Examples:
-
-        +91-98765-43210
-                ↓
-        9876543210
-
-        +91 9876543210
-                ↓
-        9876543210
-    """
-
+ 
     value = clean_string(value)
 
     if value is None:
@@ -141,9 +94,7 @@ def normalize_boolean(value):
 # ============================================================
 
 def find_column(df, possible_names):
-    """
-    Find a column using possible variations of its name.
-    """
+   
 
     columns = {
         str(column).strip().lower(): column
@@ -158,9 +109,6 @@ def find_column(df, possible_names):
     return None
 
 
-# ============================================================
-# CLEAN ONE CSV
-# ============================================================
 
 def clean_file(file_path):
 
@@ -168,10 +116,7 @@ def clean_file(file_path):
     print(f"PROCESSING: {file_path.name}")
     print("=" * 70)
 
-    # --------------------------------------------------------
-    # Load
-    # --------------------------------------------------------
-
+    
     df = pd.read_csv(file_path)
 
     original_rows = len(df)
@@ -181,20 +126,12 @@ def clean_file(file_path):
     print("\nOriginal columns:")
     print(list(df.columns))
 
-    # --------------------------------------------------------
-    # Remove planted structural problems BEFORE anything else:
-    # a repeated CSV header embedded mid-file, and rows whose
-    # fields got shifted one column to the left/right.
-    # --------------------------------------------------------
-
+    
     df = remove_repeated_header_rows(df)
 
     df = remove_malformed_shifted_rows(df)
 
-    # --------------------------------------------------------
-    # Standardize column names
-    # --------------------------------------------------------
-
+   
     df.columns = (
         df.columns
         .str.strip()
@@ -202,29 +139,17 @@ def clean_file(file_path):
         .str.replace(" ", "_", regex=False)
     )
 
-    # --------------------------------------------------------
-    # Remove completely empty rows
-    # --------------------------------------------------------
-
     before = len(df)
 
     df = df.dropna(how="all")
 
     empty_rows_removed = before - len(df)
 
-    # --------------------------------------------------------
-    # Remove exact duplicate rows
-    # --------------------------------------------------------
-
     before = len(df)
 
     df = df.drop_duplicates()
 
     exact_duplicates_removed = before - len(df)
-
-    # --------------------------------------------------------
-    # Detect important columns
-    # --------------------------------------------------------
 
     name_col = find_column(
         df,
@@ -276,19 +201,12 @@ def clean_file(file_path):
     ]
 )
 
-    # --------------------------------------------------------
-    # Print detected columns
-    # --------------------------------------------------------
-
     print("\nDetected columns:")
 
     print(f"Name  : {name_col}")
     print(f"Email : {email_col}")
     print(f"Phone : {phone_col}")
 
-    # --------------------------------------------------------
-    # Normalize NAME
-    # --------------------------------------------------------
 
     if name_col:
 
@@ -296,19 +214,12 @@ def clean_file(file_path):
             normalize_name
         )
 
-    # --------------------------------------------------------
-    # Normalize EMAIL
-    # --------------------------------------------------------
-
     if email_col:
 
         df["email_normalized"] = df[email_col].apply(
             normalize_email
         )
 
-    # --------------------------------------------------------
-    # Normalize PHONE
-    # --------------------------------------------------------
 
     if phone_col:
 
@@ -330,10 +241,7 @@ def clean_file(file_path):
         df["verified_normalized"] = df[
             verified_col
         ].apply(normalize_boolean)
-    # --------------------------------------------------------
-    # Clean other text columns
-    # --------------------------------------------------------
-
+ 
     for column in df.select_dtypes(
         include=["object"]
     ).columns:
@@ -346,23 +254,13 @@ def clean_file(file_path):
             clean_string
         )
 
-    # --------------------------------------------------------
-    # Add source information
-    # --------------------------------------------------------
-
     df["source_system"] = file_path.stem
 
-    # Preserve original source row information.
-    #
-    # This is useful when investigating data problems.
     df["source_row_number"] = range(
         2,
         len(df) + 2
     )
 
-    # --------------------------------------------------------
-    # DATA QUALITY REPORT
-    # --------------------------------------------------------
 
     print("\nData quality summary:")
 
@@ -420,9 +318,7 @@ def clean_file(file_path):
     return df
 
 def remove_repeated_header_rows(df):
-    """
-    Remove rows that repeat the CSV header.
-    """
+    
 
     normalized_columns = [
         str(col).strip().lower()
@@ -456,18 +352,7 @@ def remove_repeated_header_rows(df):
 
     return df
 def remove_malformed_shifted_rows(df):
-    """
-    Detect rows where fields appear shifted.
-
-    For the Gig Workers dataset, a valid row should have:
-        email_id -> looks like email
-        worker_name -> looks like a person's name
-        rate -> contains /hr or /month
-        location -> city/location
-        status -> status value
-        skill_tags -> skill list
-    """
-
+  
     rows_to_remove = []
 
     columns = list(df.columns)
@@ -511,13 +396,6 @@ def remove_malformed_shifted_rows(df):
             row["skill_tags"]
         ).strip()
 
-        # Detect shifted row:
-        # skills are in email column
-        # email is in worker_name column
-        # name is in rate column
-        # rate is in location column
-        # city is in status column
-
         looks_shifted = (
             "," in email_value
             and "@" in worker_name
@@ -548,9 +426,6 @@ def remove_malformed_shifted_rows(df):
         )
 
     return df
-# ============================================================
-# MAIN
-# ============================================================
 
 def main():
 

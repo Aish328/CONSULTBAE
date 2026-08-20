@@ -1,49 +1,4 @@
-"""
-Skill classifier for ConsultBae.
 
-Takes a raw, comma-separated skills string (as found in Naukri's
-"Skills" column and the gig workers' "skill_tags" column) and:
-    1. splits/normalizes it into individual clean skill tokens
-    2. classifies each skill into a category (Automation, AI/LLM,
-       Backend, Databases, Data & Scripting, Frontend, DevOps)
-    3. picks a primary_category (the category with the most matches
-       for that person) -- useful for quick candidate routing, e.g.
-       "this person is primarily a Backend person who also knows
-       some Automation tools"
-
-The taxonomy below was built directly from the actual vocabulary
-found in data/cleaned/source1_naukri_applicants.csv and
-data/cleaned/source2_gig_workers.csv (15 distinct skills, see
-`_discover_vocabulary()` at the bottom for how that was derived).
-It is NOT exhaustive -- any skill outside this list ends up in
-"uncategorized" rather than silently mis-filed, so gaps are visible
-instead of hidden.
-
---------------------------------------------------------------------
-THREE WAYS TO USE THIS FILE
---------------------------------------------------------------------
-
-1. As a plain Python function, from anywhere:
-
-    from skill_classifier import classify_skills
-    result = classify_skills("n8n, LangChain, REST APIs, MongoDB")
-
-2. Inside an n8n "Code" node (Python mode). n8n's Python code nodes
-   run in Pyodide and expose the incoming items via `_input.all()`.
-   Paste CLASSIFY_ITEMS_SNIPPET (see bottom of this file) into the
-   node, or copy classify_skills()/normalize_skill_list() in
-   directly -- Pyodide can't `import` this file from disk.
-
-3. As a standalone batch script, to classify the whole dataset and
-   write a CSV report (useful for testing outside n8n entirely):
-
-    python3 n8n/skill_classifier.py
-
-   Reads data/cleaned/source1_naukri_applicants.csv and
-   data/cleaned/source2_gig_workers.csv, classifies every row's
-   skills, and writes n8n/output/skill_classification.csv plus a
-   console summary of category distribution.
-"""
 
 import csv
 import re
@@ -80,12 +35,7 @@ CATEGORY_PRIORITY = list(SKILL_TAXONOMY.keys())
 # ============================================================
 
 def normalize_skill_list(raw_skills_text):
-    """
-    'n8n, LangChain, REST APIs, MongoDB'
-            -> ['n8n', 'langchain', 'rest apis', 'mongodb']
-
-    Handles None/NaN-like input gracefully (returns []).
-    """
+    
     if raw_skills_text is None:
         return []
 
@@ -112,10 +62,7 @@ def normalize_skill_list(raw_skills_text):
 # ============================================================
 
 def classify_skill(skill):
-    """
-    Classify one already-normalized skill string into a category,
-    or None if it doesn't match anything in the taxonomy.
-    """
+    
     for category, keywords in SKILL_TAXONOMY.items():
         if skill in keywords:
             return category
@@ -131,22 +78,7 @@ def classify_skill(skill):
 
 
 def classify_skills(raw_skills_text):
-    """
-    Main entry point. Takes a raw comma-separated skills string and
-    returns a dict:
-
-        {
-          "skills": ["n8n", "langchain", "rest apis", "mongodb"],
-          "categories": {
-              "Automation & No-Code": ["n8n"],
-              "AI / LLM": ["langchain"],
-              "Backend & APIs": ["rest apis"],
-              "Databases": ["mongodb"],
-          },
-          "primary_category": "Automation & No-Code",  # or None
-          "uncategorized": [],
-        }
-    """
+    
     skills = normalize_skill_list(raw_skills_text)
 
     categories = {}
@@ -177,35 +109,6 @@ def classify_skills(raw_skills_text):
     }
 
 
-# ============================================================
-# N8N INTEGRATION
-# ============================================================
-#
-# n8n's Python "Code" node convention: read incoming items with
-# `_input.all()`, each item exposes `.json` (a dict), and the node
-# must end with a variable/expression producing a list of dicts
-# (each wrapped in {"json": ...}) as the return value.
-#
-# Paste the block below into an n8n Python Code node (after also
-# pasting in SKILL_TAXONOMY, normalize_skill_list, classify_skill,
-# and classify_skills from above -- Pyodide can't import this file
-# from disk, so the whole thing needs to live in the node).
-#
-# CLASSIFY_ITEMS_SNIPPET:
-# ------------------------------------------------------------
-#   results = []
-#   for item in _input.all():
-#       data = item.json
-#       skills_text = data.get("skills") or data.get("skill_tags") or ""
-#       classification = classify_skills(skills_text)
-#       results.append({"json": {**data, "skill_classification": classification}})
-#   return results
-# ------------------------------------------------------------
-#
-# If instead you're calling this script from n8n's "Execute Command"
-# node (rather than a Python Code node), use process_items_json()
-# below, which reads a JSON array from stdin and writes a JSON array
-# to stdout -- e.g. `python3 n8n/skill_classifier.py --stdin-json`.
 
 def process_items_json(items):
     """
@@ -223,9 +126,6 @@ def process_items_json(items):
     return results
 
 
-# ============================================================
-# STANDALONE BATCH MODE
-# ============================================================
 
 CLEANED_DIR = Path("data/cleaned")
 OUTPUT_DIR = Path("n8n/output")

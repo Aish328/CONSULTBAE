@@ -1,17 +1,3 @@
-"""
-Database access for the web app (Task 3).
-
-Uses the same connection style as scripts/ingest_to_db.py (raw
-psycopg2, credentials from .env) so both the batch pipeline and the
-web app talk to Postgres the same way.
-
-Person matching here is intentionally simple compared to
-scripts/match_people.py: that script does offline fuzzy matching
-across three CSV exports. Here, someone is submitting audio live
-through a form, so we just need to know "have we seen this email or
-phone before" -- exact match on email first (most reliable), then
-phone. If neither matches, a new person row is created.
-"""
 
 import os
 
@@ -86,12 +72,6 @@ def create_person(conn, name, email, phone):
 
 
 def get_or_create_person(conn, name, email, phone):
-    """
-    Find a matching person by email/phone; if none exists, create
-    one. This is the single entry point app.py should call -- it
-    keeps the match-then-create logic in one place instead of
-    scattered across routes.
-    """
     existing = find_person(conn, email=email, phone=phone)
     if existing:
         return existing, False  # (person, created_new)
@@ -101,11 +81,6 @@ def get_or_create_person(conn, name, email, phone):
 
 
 def insert_audio_submission(conn, person_id, audio_path, metrics):
-    """
-    metrics: dict with keys duration_seconds, sample_rate_khz,
-    bitrate_kbps, loudness_db, noise_score (all from
-    audio_processor.process_audio).
-    """
     with conn.cursor() as cur:
         cur.execute(
             """
@@ -150,14 +125,7 @@ def get_submissions_for_person(conn, person_id):
 
 
 def get_all_submissions(conn):
-    """
-    All audio submissions across all people, newest first, joined
-    with the submitter's name/email/phone -- this is what the
-    "second view listing all submissions" (Task 3 requirement) reads
-    from. Returns a list of plain dicts rather than AudioSubmission
-    objects, since this is a joined/denormalized shape the dataclass
-    doesn't represent.
-    """
+   
     with conn.cursor() as cur:
         cur.execute(
             """

@@ -1,18 +1,5 @@
 """
 ConsultBae Task 3 -- audio submission web app.
-
-Single endpoint that lets a person submit their name/email/phone
-plus an audio recording. We:
-  1. find-or-create their `persons` row (matches Task 1's dedup
-     logic in spirit: email first, then phone)
-  2. save the uploaded audio file to disk
-  3. analyze it (duration, sample rate, bitrate, loudness, noise)
-  4. store the analysis in `audio_submissions`
-
-Run locally with:
-    python3 backend/app.py
-(requires the same .env as scripts/ingest_to_db.py: DB_HOST,
-DB_PORT, DB_NAME, DB_USER, DB_PASSWORD)
 """
 
 import os
@@ -39,21 +26,13 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 
 @app.route("/", methods=["GET"])
 def index():
-    """
-    Serves frontend/index.html directly from Flask, so the page and
-    the API share one origin (no CORS setup needed) and there's an
-    actual page here instead of the default 404.
-    """
+ 
     return send_from_directory(FRONTEND_DIR, "index.html")
 
 
 @app.route("/submissions", methods=["GET"])
 def submissions_page():
-    """
-    The "second view" required by Task 3: lists every audio
-    submission across all people with a play button and the
-    extracted properties.
-    """
+   
     return send_from_directory(FRONTEND_DIR, "submissions.html")
 
 
@@ -64,8 +43,7 @@ def health():
 
 @app.route("/api/submissions", methods=["GET"])
 def all_submissions():
-    """All audio submissions, newest first, joined with the
-    submitter's name/email/phone. Backs the /submissions page."""
+   
     conn = database.get_connection()
     try:
         submissions = database.get_all_submissions(conn)
@@ -76,16 +54,7 @@ def all_submissions():
 
 @app.route("/api/audio/<path:filename>", methods=["GET"])
 def serve_audio(filename):
-    """
-    Streams a stored audio file so the <audio> player on the
-    submissions list can actually play it.
-
-    Path-traversal note: we only accept a bare filename (no
-    directories) and only serve files that already exist inside
-    UPLOAD_DIR -- send_from_directory itself also refuses to resolve
-    outside its given directory, but the basename check below is a
-    second, explicit guard rather than relying solely on that.
-    """
+   
     safe_name = Path(filename).name
     if safe_name != filename or not (UPLOAD_DIR / safe_name).is_file():
         return jsonify({"error": "audio file not found"}), 404
@@ -94,13 +63,7 @@ def serve_audio(filename):
 
 @app.route("/api/submit", methods=["POST"])
 def submit():
-    """
-    multipart/form-data:
-        name  (required)
-        email (optional if phone given)
-        phone (optional if email given)
-        audio (required, file)
-    """
+   
     name = (request.form.get("name") or "").strip()
     email = (request.form.get("email") or "").strip() or None
     phone = (request.form.get("phone") or "").strip() or None

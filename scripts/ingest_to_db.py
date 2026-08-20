@@ -1,18 +1,3 @@
-"""
-Writes the merged/matched data into Postgres.
-
-Pipeline this script assumes has already run, in order:
-    1. scripts/clean_data.py   -> data/cleaned/*.csv
-    2. scripts/match_people.py -> data/matched/matching_results.csv
-    3. this script              -> Postgres: persons, source_records
-
-Rerun-safety: this script TRUNCATEs persons and source_records
-before inserting. That's a deliberate choice for a batch pipeline
-like this one -- re-ingesting should always produce the same,
-reproducible result, not silently pile up duplicate rows on every
-rerun. (audio_submissions is untouched, since that table is written
-to by the web app in Task 3, not by this pipeline.)
-"""
 
 import os
 from pathlib import Path
@@ -40,21 +25,14 @@ def get_connection():
 
 
 def ensure_schema(conn):
-    """Create tables if they don't exist yet (safe to run every time)."""
+   
     with conn.cursor() as cur:
         cur.execute(SCHEMA_FILE.read_text())
     conn.commit()
 
 
 def clear_existing_data(conn):
-    """
-    Wipe persons + source_records so this script is idempotent.
-    RESTART IDENTITY resets the SERIAL id counters back to 1.
-    CASCADE also clears anything referencing persons.id via FK
-    (i.e. source_records; audio_submissions has its own FK to
-    persons but we don't want to wipe real user-submitted audio
-    just because we re-ran the CSV pipeline -- see note below).
-    """
+    
     with conn.cursor() as cur:
         cur.execute("TRUNCATE TABLE source_records RESTART IDENTITY;")
         cur.execute("TRUNCATE TABLE persons RESTART IDENTITY CASCADE;")
@@ -62,11 +40,7 @@ def clear_existing_data(conn):
 
 
 def insert_persons(conn, persons_df):
-    """
-    Insert one row per real person and return a mapping from the
-    CSV's person_id (arbitrary integer from match_people.py) to
-    the real database-generated id (from the SERIAL column).
-    """
+   
     csv_id_to_db_id = {}
 
     with conn.cursor() as cur:
@@ -112,14 +86,7 @@ def insert_source_records(conn, source_records_df, csv_id_to_db_id):
 
 
 def _clean_for_db(df):
-    """
-    Convert pandas' nullable NA markers (pd.NA / NaN) to plain
-    Python None, since psycopg2 doesn't know how to adapt pd.NA.
-    This bit us specifically on the "phone" column (dtype="string"
-    above uses pd.NA for missing values, e.g. all 30 gig_workers
-    rows which have no phone field at all), but we apply it to the
-    whole dataframe defensively rather than just the one column.
-    """
+   
     return df.astype(object).where(pd.notnull(df), None)
 
 

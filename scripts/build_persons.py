@@ -1,16 +1,4 @@
-"""
-Turns matching_results.csv (one row per SOURCE record) into:
 
-  1. persons_df       -- one row per real person, with a single
-                          canonical name/email/phone/city chosen
-                          for that person
-  2. source_records_df -- unchanged, one row per source record,
-                          still carrying person_id as the link
-
-This is deliberately separated from the database-writing step
-(ingest_to_db.py) so the "which value wins" logic can be tested
-on its own, without needing a live Postgres connection.
-"""
 
 from pathlib import Path
 
@@ -27,13 +15,7 @@ SOURCE_PRIORITY = ["naukri", "cbnexus", "gig_workers"]
 
 
 def choose_canonical_record(person_rows):
-    """
-    person_rows: DataFrame of all source rows for ONE person_id.
-
-    Returns a dict with the canonical name/email/phone/city for
-    that person, plus a note on which source(s) contributed.
-    """
-
+   
     # Sort candidate rows by source priority, most-preferred first.
     ordered = person_rows.copy()
     ordered["priority"] = ordered["source_system"].apply(
@@ -63,13 +45,6 @@ def choose_canonical_record(person_rows):
 
 
 def build_persons(matched_df):
-    """
-    Returns (persons_df, source_records_df).
-
-    persons_df has one row per person_id with canonical fields.
-    source_records_df is matched_df unchanged (kept separate so
-    the caller can insert it as-is into source_records).
-    """
 
     person_records = []
 

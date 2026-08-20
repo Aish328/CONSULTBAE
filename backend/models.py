@@ -1,16 +1,7 @@
-"""
-Plain data shapes used across the backend.
-
-These are deliberately simple dataclasses -- not an ORM -- to match
-the style of the rest of this project (raw psycopg2 in
-scripts/ingest_to_db.py, no SQLAlchemy anywhere). Keeping the web
-app on the same pattern means one less thing to learn/maintain.
-"""
 
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
-
 
 @dataclass
 class Person:
@@ -58,9 +49,7 @@ class AudioSubmission:
 
     @classmethod
     def from_row(cls, row):
-        """row: (id, person_id, audio_path, duration_seconds,
-        sample_rate_khz, bitrate_kbps, loudness_db, noise_score,
-        created_at)"""
+        
         if row is None:
             return None
         return cls(

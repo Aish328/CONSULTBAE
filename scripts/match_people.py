@@ -4,20 +4,10 @@ from pathlib import Path
 import pandas as pd
 from rapidfuzz.fuzz import ratio
 
-
-# ============================================================
-# CONFIGURATION
-# ============================================================
-
 CLEANED_DIR = Path(r"C:\Users\Lenovo\Desktop\consultbae_updated\consultbae\data\cleaned")
 OUTPUT_DIR = Path(r"C:\Users\Lenovo\Desktop\consultbae_updated\consultbae\data\matched")
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-
-# ============================================================
-# NORMALIZATION
-# ============================================================
 
 def clean_text(value):
     if pd.isna(value) or value is None:
@@ -78,10 +68,6 @@ def normalize_city(value):
     return value.lower()
 
 
-# ============================================================
-# NAME SIMILARITY
-# ============================================================
-
 def name_similarity(name1, name2):
 
     if not name1 or not name2:
@@ -92,10 +78,6 @@ def name_similarity(name1, name2):
         normalize_name(name2)
     )
 
-
-# ============================================================
-# LOAD DATA
-# ============================================================
 
 def load_sources():
 
@@ -113,10 +95,6 @@ def load_sources():
 
     return naukri, gig, cbnexus
 
-
-# ============================================================
-# PREPARE NAUKRI
-# ============================================================
 
 def prepare_naukri(df):
 
@@ -149,11 +127,6 @@ def prepare_naukri(df):
 
     return result
 
-
-# ============================================================
-# PREPARE GIG WORKERS
-# ============================================================
-
 def prepare_gig(df):
 
     result = pd.DataFrame()
@@ -184,10 +157,6 @@ def prepare_gig(df):
     return result
 
 
-# ============================================================
-# PREPARE CBNEXUS
-# ============================================================
-
 def prepare_cbnexus(df):
 
     result = pd.DataFrame()
@@ -217,19 +186,12 @@ def prepare_cbnexus(df):
 
     return result
 
-
-# ============================================================
-# MATCH SCORE
-# ============================================================
-
 def calculate_match(record_a, record_b):
 
     score = 0
     reasons = []
 
-    # --------------------------------------------------------
-    # Exact email
-    # --------------------------------------------------------
+
 
     if (
         record_a["email"]
@@ -243,10 +205,6 @@ def calculate_match(record_a, record_b):
             "exact_email"
         )
 
-    # --------------------------------------------------------
-    # Exact phone
-    # --------------------------------------------------------
-
     if (
         record_a["phone"]
         and record_b["phone"]
@@ -258,10 +216,6 @@ def calculate_match(record_a, record_b):
         reasons.append(
             "exact_phone"
         )
-
-    # --------------------------------------------------------
-    # Name similarity
-    # --------------------------------------------------------
 
     similarity = name_similarity(
         record_a["name"],
@@ -292,10 +246,6 @@ def calculate_match(record_a, record_b):
             f"name_similarity_{similarity:.1f}"
         )
 
-    # --------------------------------------------------------
-    # City agreement
-    # --------------------------------------------------------
-
     if (
         record_a["city"]
         and record_b["city"]
@@ -311,9 +261,6 @@ def calculate_match(record_a, record_b):
     return score, reasons
 
 
-# ============================================================
-# MATCH TWO RECORDS
-# ============================================================
 
 def classify_match(score, reasons):
 
@@ -332,30 +279,12 @@ def classify_match(score, reasons):
     return "NO_MATCH"
 
 
-# ============================================================
-# MATCH DATASETS
-# ============================================================
-
 def perform_matching(naukri, gig, cbnexus):
 
     results = []
 
     person_counter = 1
 
-    # --------------------------------------------------------
-    # Create a person for every Naukri record, but first check
-    # each row against EARLIER Naukri rows already processed.
-    #
-    # This catches the same person appearing twice within the
-    # same file (e.g. "R. Verma" and "Rohit Verma" sharing an
-    # email+phone, or a name re-entered with an alt. email).
-    #
-    # Only an exact email or exact phone match (HIGH_CONFIDENCE)
-    # is accepted here -- name similarity alone is deliberately
-    # NOT enough to merge within Naukri, because two different
-    # real people can share a name (see: the two "Arjun Mehta"
-    # records with different phone numbers across the files).
-    # --------------------------------------------------------
 
     person_map = {}
 
@@ -427,10 +356,6 @@ def perform_matching(naukri, gig, cbnexus):
             ("naukri", index)
         ] = person_id
 
-    # --------------------------------------------------------
-    # Match Gig Workers to Naukri
-    # --------------------------------------------------------
-
     for gig_index, gig_record in gig.iterrows():
 
         best_person = None
@@ -498,9 +423,6 @@ def perform_matching(naukri, gig, cbnexus):
                 "match_reason": "no_confident_match"
             })
 
-    # --------------------------------------------------------
-    # Match CBNexus to Naukri
-    # --------------------------------------------------------
 
     for cb_index, cb_record in cbnexus.iterrows():
 
@@ -570,10 +492,6 @@ def perform_matching(naukri, gig, cbnexus):
     return pd.DataFrame(results)
 
 
-# ============================================================
-# MAIN
-# ============================================================
-
 def main():
 
     print("=" * 70)
@@ -627,10 +545,6 @@ def main():
         output_file,
         index=False
     )
-
-    # --------------------------------------------------------
-    # SUMMARY
-    # --------------------------------------------------------
 
     print("\n" + "=" * 70)
     print("MATCHING SUMMARY")
