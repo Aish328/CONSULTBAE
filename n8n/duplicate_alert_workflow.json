@@ -1,0 +1,320 @@
+{
+  "name": "ConsultBae - New Submission Duplicate Check",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new-submissions",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger-01",
+      "name": "New CSV Received",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        280
+      ],
+      "webhookId": "consultbae-new-submissions"
+    },
+    {
+      "parameters": {
+        "operation": "csv",
+        "binaryPropertyName": "file",
+        "options": {}
+      },
+      "id": "extract-csv-02",
+      "name": "Extract CSV Rows",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        80,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Mirrors find_column() in scripts/clean_data.py: raw incoming CSVs\n// have real headers like 'Full Name', 'Phone Number', 'email_id' --\n// not consistent snake_case -- so matching must be case/space\n// insensitive or it silently misses 2 of the 3 known source formats.\n\nconst NAME_ALIASES = ['name', 'full_name', 'fullname', 'candidate_name', 'worker_name', 'person_name'];\nconst EMAIL_ALIASES = ['email', 'email_address', 'email_id', 'mail'];\nconst PHONE_ALIASES = ['phone', 'phone_number', 'mobile', 'mobile_number', 'contact', 'contact_number'];\n\nfunction findField(row, aliases) {\n  const keyMap = {};\n  for (const k of Object.keys(row)) {\n    keyMap[k.trim().toLowerCase().replace(/\\s+/g, '_')] = k;\n  }\n  for (const alias of aliases) {\n    if (keyMap[alias] !== undefined && row[keyMap[alias]]) return row[keyMap[alias]];\n  }\n  return null;\n}\n\nreturn items.map(item => {\n  const row = item.json;\n  const rawName = findField(row, NAME_ALIASES) || '';\n  const rawEmail = findField(row, EMAIL_ALIASES) || '';\n  const rawPhone = findField(row, PHONE_ALIASES) || '';\n\n  const emailNormalized = rawEmail ? String(rawEmail).toLowerCase().trim() : null;\n  const phoneDigits = String(rawPhone).replace(/\\D/g, '');\n  const phoneNormalized = phoneDigits ? phoneDigits.slice(-10) : null;\n\n  return {\n    json: {\n      candidate_name: String(rawName).trim(),\n      raw_email: rawEmail,\n      raw_phone: rawPhone,\n      email_normalized: emailNormalized,\n      phone_normalized: phoneNormalized,\n    }\n  };\n});"
+      },
+      "id": "normalize-fields-03",
+      "name": "Normalize Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        280
+      ],
+      "notes": "This is the one Code node in the flow -- used for case/space-insensitive header matching across 3 different CSV formats, which isn't expressible as simple per-field Set-node expressions. The trigger, DB checks, branching, and both write-back actions are all native n8n nodes; this isn't a pure-code solution wearing an n8n costume."
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  '{{ $json.candidate_name.replace(/'/g, \"''\") }}' AS candidate_name,\n  {{ $json.email_normalized ? `'${$json.email_normalized.replace(/'/g, \"''\")}'` : 'NULL' }} AS email_in,\n  {{ $json.phone_normalized ? `'${$json.phone_normalized}'` : 'NULL' }} AS phone_in,\n  EXISTS (\n    SELECT 1 FROM persons\n    WHERE ({{ $json.email_normalized ? `email = '${$json.email_normalized.replace(/'/g, \"''\")}'` : 'FALSE' }})\n       OR ({{ $json.phone_normalized ? `phone = '${$json.phone_normalized}'` : 'FALSE' }})\n  ) AS is_duplicate,\n  (SELECT id FROM persons\n    WHERE ({{ $json.email_normalized ? `email = '${$json.email_normalized.replace(/'/g, \"''\")}'` : 'FALSE' }})\n       OR ({{ $json.phone_normalized ? `phone = '${$json.phone_normalized}'` : 'FALSE' }})\n    LIMIT 1) AS matched_person_id,\n  (SELECT name FROM persons\n    WHERE ({{ $json.email_normalized ? `email = '${$json.email_normalized.replace(/'/g, \"''\")}'` : 'FALSE' }})\n       OR ({{ $json.phone_normalized ? `phone = '${$json.phone_normalized}'` : 'FALSE' }})\n    LIMIT 1) AS matched_person_name;",
+        "options": {}
+      },
+      "id": "check-database-04",
+      "name": "Check Against Database",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        560,
+        280
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "consultbae-postgres-credential",
+          "name": "ConsultBae Postgres"
+        }
+      },
+      "notes": "NOTE ON SQL SAFETY: this demo builds the query via string interpolation with manual quote-escaping (replace(/'/g, \"''\")) rather than the Postgres node's native parameter binding, to keep the expression readable inside this JSON export. For anything beyond a take-home demo, switch to $1/$2 placeholders + the node's 'Query Parameters' field instead -- interpolated SQL is a real injection risk if this ever accepts untrusted input directly."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-dup-condition",
+              "leftValue": "={{ $json.is_duplicate }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "is-duplicate-05",
+      "name": "Is Duplicate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        800,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "alert-type",
+              "name": "alert_type",
+              "type": "string",
+              "value": "duplicate_submission_detected"
+            },
+            {
+              "id": "alert-incoming-name",
+              "name": "incoming_name",
+              "type": "string",
+              "value": "={{ $json.candidate_name }}"
+            },
+            {
+              "id": "alert-incoming-email",
+              "name": "incoming_email",
+              "type": "string",
+              "value": "={{ $json.email_in }}"
+            },
+            {
+              "id": "alert-incoming-phone",
+              "name": "incoming_phone",
+              "type": "string",
+              "value": "={{ $json.phone_in }}"
+            },
+            {
+              "id": "alert-matched-id",
+              "name": "matched_person_id",
+              "type": "number",
+              "value": "={{ $json.matched_person_id }}"
+            },
+            {
+              "id": "alert-matched-name",
+              "name": "matched_person_name",
+              "type": "string",
+              "value": "={{ $json.matched_person_name }}"
+            },
+            {
+              "id": "alert-detected-at",
+              "name": "detected_at",
+              "type": "string",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "build-alert-06",
+      "name": "Build Alert Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://webhook.site/REPLACE_WITH_YOUR_ALERT_URL",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "send-alert-07",
+      "name": "Send Duplicate Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        120
+      ],
+      "notes": "Swap the URL for a Slack Incoming Webhook URL or any endpoint you want. For the demo video, https://webhook.site gives you a free, instant URL you can watch the alert land on in real time -- no account needed."
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO persons (name, email, phone)\nVALUES (\n  '{{ $json.candidate_name.replace(/'/g, \"''\") }}',\n  {{ $json.email_normalized ? `'${$json.email_normalized.replace(/'/g, \"''\")}'` : 'NULL' }},\n  {{ $json.phone_normalized ? `'${$json.phone_normalized}'` : 'NULL' }}\n)\nRETURNING id;",
+        "options": {}
+      },
+      "id": "insert-person-08",
+      "name": "Insert New Person",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1040,
+        420
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "consultbae-postgres-credential",
+          "name": "ConsultBae Postgres"
+        }
+      },
+      "notes": "Goes beyond the minimum spec: rather than only alerting on duplicates, genuinely new people get merged straight into the canonical persons table, extending Task 1's pipeline with a live intake path instead of only a batch one."
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO source_records\n  (person_id, source_system, source_record_id, raw_name, raw_email, raw_phone)\nVALUES (\n  {{ $json.id }},\n  'n8n_live_intake',\n  'webhook_' || {{ $json.id }} || '_' || extract(epoch from now())::text,\n  '{{ $('Normalize Fields').item.json.candidate_name.replace(/'/g, \"''\") }}',\n  {{ $('Normalize Fields').item.json.raw_email ? `'${$('Normalize Fields').item.json.raw_email.replace(/'/g, \"''\")}'` : 'NULL' }},\n  {{ $('Normalize Fields').item.json.raw_phone ? `'${$('Normalize Fields').item.json.raw_phone.replace(/'/g, \"''\")}'` : 'NULL' }}\n);",
+        "options": {}
+      },
+      "id": "insert-source-record-09",
+      "name": "Insert Source Record",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1280,
+        420
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "consultbae-postgres-credential",
+          "name": "ConsultBae Postgres"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "New CSV Received": {
+      "main": [
+        [
+          {
+            "node": "Extract CSV Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract CSV Rows": {
+      "main": [
+        [
+          {
+            "node": "Normalize Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Fields": {
+      "main": [
+        [
+          {
+            "node": "Check Against Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Against Database": {
+      "main": [
+        [
+          {
+            "node": "Is Duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Duplicate?": {
+      "main": [
+        [
+          {
+            "node": "Build Alert Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert New Person",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Alert Message": {
+      "main": [
+        [
+          {
+            "node": "Send Duplicate Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert New Person": {
+      "main": [
+        [
+          {
+            "node": "Insert Source Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

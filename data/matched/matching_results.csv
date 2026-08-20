@@ -1,0 +1,103 @@
+person_id,source_system,source_row,name,email,phone,city,match_type,match_score,match_reason
+1,naukri,2,tanvi gupta,tanvi.gupta31@example.com,9000000254,bengaluru,BASE_RECORD,0,naukri_base
+2,naukri,3,manish reddy,manish.reddy73@example.com,9000000237,gurgaon,BASE_RECORD,0,naukri_base
+3,naukri,4,priya singh,priya.singh61@mailtest.example.org,9000000287,gurgaon,BASE_RECORD,0,naukri_base
+4,naukri,5,vikram saxena,vikram.saxena60@example.com,9000000113,gurgaon,BASE_RECORD,0,naukri_base
+5,naukri,6,amit agarwal,amit.agarwal3@mailtest.example.org,9000000288,pune,BASE_RECORD,0,naukri_base
+6,naukri,7,sahil malhotra,sahil.malhotra1@example.in,9000000143,noida,BASE_RECORD,0,naukri_base
+7,naukri,8,shreya gupta,shreya.gupta85@example.com,9000000227,noida,BASE_RECORD,0,naukri_base
+8,naukri,9,isha chopra,isha.chopra95@mailtest.example.org,9000000138,pune,BASE_RECORD,0,naukri_base
+9,naukri,10,priya nair,priya.nair70@example.com,9000000222,gurugram,BASE_RECORD,0,naukri_base
+10,naukri,11,rohit mishra,rohit.mishra70@mailtest.example.org,9000000167,delhi,BASE_RECORD,0,naukri_base
+11,naukri,12,rahul malhotra,rahul.malhotra69@mailtest.example.org,9000000260,new delhi,BASE_RECORD,0,naukri_base
+12,naukri,13,rahul jain,rahul.jain34@example.in,9000000114,noida,BASE_RECORD,0,naukri_base
+13,naukri,14,nikhil malhotra,nikhil.malhotra41@example.in,9000000145,new delhi,BASE_RECORD,0,naukri_base
+14,naukri,15,karan bhatia,karan.bhatia32@mailtest.example.org,9000000211,noida,BASE_RECORD,0,naukri_base
+15,naukri,16,ritu sharma,ritu.sharma23@mailtest.example.org,9000000146,noida,BASE_RECORD,0,naukri_base
+16,naukri,17,arjun mishra,arjun.mishra70@example.com,9000000106,delhi,BASE_RECORD,0,naukri_base
+17,naukri,18,meera bhatia,meera.bhatia52@mailtest.example.org,9000000223,delhi ncr,BASE_RECORD,0,naukri_base
+18,naukri,19,varun jain,varun.jain29@example.com,9000000263,pune,BASE_RECORD,0,naukri_base
+19,naukri,20,arjun mehta,arjun.mehta9@example.in,9000000131,noida,BASE_RECORD,0,naukri_base
+20,naukri,21,kavya mehta,kavya.mehta7@example.com,9000000177,bengaluru,BASE_RECORD,0,naukri_base
+21,naukri,22,sneha chopra,sneha.chopra99@example.in,9000000162,pune,BASE_RECORD,0,naukri_base
+22,naukri,23,deepak mehta,deepak.mehta86@example.in,9000000116,noida,BASE_RECORD,0,naukri_base
+23,naukri,24,pooja gupta,pooja.gupta57@mailtest.example.org,9000000271,noida,BASE_RECORD,0,naukri_base
+24,naukri,25,r. verma,rohit.verma13@mailtest.example.org,9000000294,bangalore,BASE_RECORD,0,naukri_base
+25,naukri,26,sneha mishra,sneha.mishra14@mailtest.example.org,9000000229,pune,BASE_RECORD,0,naukri_base
+26,naukri,27,nikhil chopra,alt.nikhil.chopra70@example.com,9000000103,noida,BASE_RECORD,0,naukri_base
+27,naukri,28,priya saxena,priya.saxena61@example.com,9000000231,delhi,BASE_RECORD,0,naukri_base
+28,naukri,29,varun saxena,varun.saxena21@example.in,9000000170,gurugram,BASE_RECORD,0,naukri_base
+29,naukri,30,gaurav mehta,gaurav.mehta79@mailtest.example.org,9000000133,bengaluru,BASE_RECORD,0,naukri_base
+24,naukri,31,rohit verma,rohit.verma13@mailtest.example.org,9000000294,bangalore,DUPLICATE_WITHIN_SOURCE,220,exact_email|exact_phone|name_similarity_73.7|same_city
+30,naukri,32,rohit nair,rohit.nair32@mailtest.example.org,9000000268,gurugram,BASE_RECORD,0,naukri_base
+31,naukri,33,deepak nair,deepak.nair44@example.com,9000000296,bangalore,BASE_RECORD,0,naukri_base
+32,naukri,34,rahul chopra,rahul.chopra70@example.com,9000000137,noida,BASE_RECORD,0,naukri_base
+33,naukri,35,deepak singh,deepak.singh36@mailtest.example.org,9000000202,bangalore,BASE_RECORD,0,naukri_base
+34,naukri,36,amit reddy,amit.reddy9@mailtest.example.org,9000000165,delhi ncr,BASE_RECORD,0,naukri_base
+26,naukri,37,nikhil chopra,nikhil.chopra70@example.com,9000000103,noida,DUPLICATE_WITHIN_SOURCE,140,exact_phone|name_similarity_100.0|same_city
+35,naukri,38,tanvi agarwal,tanvi.agarwal97@example.in,9000000148,pune,BASE_RECORD,0,naukri_base
+36,naukri,39,nikhil mehta,nikhil.mehta5@example.com,9000000104,pune,BASE_RECORD,0,naukri_base
+37,naukri,40,isha kapoor,isha.kapoor54@example.com,9000000295,new delhi,BASE_RECORD,0,naukri_base
+38,naukri,41,arjun bhatia,arjun.bhatia14@example.com,9000000212,new delhi,BASE_RECORD,0,naukri_base
+39,naukri,42,isha sharma,isha.sharma15@example.com,9000000259,delhi,BASE_RECORD,0,naukri_base
+40,naukri,43,neha bhatia,neha.bhatia60@mailtest.example.org,9000000273,pune,BASE_RECORD,0,naukri_base
+18,gig_workers,2,varun jain,varun.jain29@example.com,,pune,HIGH_CONFIDENCE,140,exact_email|name_similarity_100.0|same_city
+35,gig_workers,3,tanvi agarwal,tanvi.agarwal97@example.in,,pune,HIGH_CONFIDENCE,140,exact_email|name_similarity_100.0|same_city
+14,gig_workers,4,karan bhatia,karan.bhatia32@mailtest.example.org,,noida,HIGH_CONFIDENCE,140,exact_email|name_similarity_100.0|same_city
+16,gig_workers,5,arjun mishra,arjun.mishra70@example.com,,delhi,HIGH_CONFIDENCE,140,exact_email|name_similarity_100.0|same_city
+37,gig_workers,6,isha kapoor,isha.kapoor54@example.com,,delhi,HIGH_CONFIDENCE,130,exact_email|name_similarity_100.0
+8,gig_workers,7,isha chopra,isha.chopra95@mailtest.example.org,,pune,HIGH_CONFIDENCE,140,exact_email|name_similarity_100.0|same_city
+17,gig_workers,8,meera bhatia,meera.bhatia52@mailtest.example.org,,new delhi,HIGH_CONFIDENCE,130,exact_email|name_similarity_100.0
+4,gig_workers,9,vikram saxena,vikram.saxena60@example.com,,gurgaon,HIGH_CONFIDENCE,140,exact_email|name_similarity_100.0|same_city
+32,gig_workers,10,rahul chopra,rahul.chopra70@example.com,,noida,HIGH_CONFIDENCE,140,exact_email|name_similarity_100.0|same_city
+1,gig_workers,11,tanvi gupta,tanvi.gupta31@example.com,,bangalore,HIGH_CONFIDENCE,130,exact_email|name_similarity_100.0
+28,gig_workers,12,varun saxena,varun.saxena21@example.in,,gurugram,HIGH_CONFIDENCE,140,exact_email|name_similarity_100.0|same_city
+21,gig_workers,13,sneha chopra,sneha.chopra99@example.in,,pune,HIGH_CONFIDENCE,140,exact_email|name_similarity_100.0|same_city
+31,gig_workers,14,deepak nair,deepak.nair44@example.com,,bengaluru,HIGH_CONFIDENCE,130,exact_email|name_similarity_100.0
+29,gig_workers,15,gaurav mehta,gaurav.mehta79@mailtest.example.org,,bangalore,HIGH_CONFIDENCE,130,exact_email|name_similarity_100.0
+40,gig_workers,16,neha bhatia,neha.bhatia60@mailtest.example.org,,pune,HIGH_CONFIDENCE,140,exact_email|name_similarity_100.0|same_city
+41,gig_workers,17,arjun mehta,arjun.mehta77@mailtest.example.org,,noida,NEW_PERSON,40,no_confident_match
+42,gig_workers,18,manish bhatia,manish.bhatia3@example.com,,noida,NEW_PERSON,20,no_confident_match
+43,gig_workers,19,divya chopra,divya.chopra59@example.in,,noida,NEW_PERSON,10,no_confident_match
+44,gig_workers,20,karan chopra,karan.chopra76@mailtest.example.org,,pune,NEW_PERSON,10,no_confident_match
+45,gig_workers,21,vikram mehta,vikram.mehta6@example.com,,pune,NEW_PERSON,10,no_confident_match
+46,gig_workers,22,pooja kapoor,pooja.kapoor62@example.in,,noida,NEW_PERSON,10,no_confident_match
+47,gig_workers,23,kavya verma,kavya.verma74@mailtest.example.org,,gurugram,NEW_PERSON,10,no_confident_match
+48,gig_workers,24,tanvi reddy,tanvi.reddy80@example.com,,pune,NEW_PERSON,10,no_confident_match
+49,gig_workers,25,varun singh,varun.singh81@example.com,,noida,NEW_PERSON,10,no_confident_match
+50,gig_workers,26,tanvi kapoor,tanvi.kapoor38@example.com,,new delhi,NEW_PERSON,10,no_confident_match
+51,gig_workers,27,nikhil nair,nikhil.nair26@example.in,,gurugram,NEW_PERSON,10,no_confident_match
+52,gig_workers,28,pooja reddy,pooja.reddy96@mailtest.example.org,,noida,NEW_PERSON,10,no_confident_match
+53,gig_workers,29,tanvi sharma,tanvi.sharma56@mailtest.example.org,,noida,NEW_PERSON,10,no_confident_match
+54,gig_workers,30,deepak nair,deepak.nair57@example.in,,new delhi,NEW_PERSON,30,no_confident_match
+55,gig_workers,31,anjali agarwal,anjali.agarwal53@mailtest.example.org,,bengaluru,NEW_PERSON,10,no_confident_match
+30,cbnexus,2,rohit nair,,9000000268,gurgaon,HIGH_CONFIDENCE,130,exact_phone|name_similarity_100.0
+15,cbnexus,3,ritu sharma,,9000000146,noida,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+27,cbnexus,4,priya saxena,,9000000231,new delhi,HIGH_CONFIDENCE,130,exact_phone|name_similarity_100.0
+19,cbnexus,5,arjun mehta,,9000000131,noida,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+36,cbnexus,6,nikhil mehta,,9000000104,pune,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+11,cbnexus,7,rahul malhotra,,9000000260,delhi ncr,HIGH_CONFIDENCE,130,exact_phone|name_similarity_100.0
+22,cbnexus,8,deepak mehta,,9000000116,noida,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+6,cbnexus,9,sahil malhotra,,9000000143,noida,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+7,cbnexus,10,shreya gupta,,9000000227,noida,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+3,cbnexus,11,priya singh,,9000000287,gurugram,HIGH_CONFIDENCE,130,exact_phone|name_similarity_100.0
+18,cbnexus,12,varun jain,,9000000263,pune,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+35,cbnexus,13,tanvi agarwal,,9000000148,pune,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+14,cbnexus,14,karan bhatia,,9000000211,noida,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+16,cbnexus,15,arjun mishra,,9000000106,new delhi,HIGH_CONFIDENCE,130,exact_phone|name_similarity_100.0
+37,cbnexus,16,isha kapoor,,9000000295,new delhi,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+8,cbnexus,17,isha chopra,,9000000138,pune,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+17,cbnexus,18,meera bhatia,,9000000223,delhi,HIGH_CONFIDENCE,130,exact_phone|name_similarity_100.0
+4,cbnexus,19,vikram saxena,,9000000113,gurgaon,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+32,cbnexus,20,rahul chopra,,9000000137,noida,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+1,cbnexus,21,tanvi gupta,,9000000254,bengaluru,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+28,cbnexus,22,varun saxena,,9000000170,gurgaon,HIGH_CONFIDENCE,130,exact_phone|name_similarity_100.0
+21,cbnexus,23,sneha chopra,,9000000162,pune,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+31,cbnexus,24,deepak nair,,9000000296,bengaluru,HIGH_CONFIDENCE,130,exact_phone|name_similarity_100.0
+29,cbnexus,25,gaurav mehta,,9000000133,bengaluru,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+40,cbnexus,26,neha bhatia,,9000000273,pune,HIGH_CONFIDENCE,140,exact_phone|name_similarity_100.0|same_city
+56,cbnexus,27,arjun mehta,,9000000272,noida,NEW_PERSON,40,no_confident_match
+57,cbnexus,28,manish bhatia,,9000000161,noida,NEW_PERSON,20,no_confident_match
+58,cbnexus,29,divya chopra,,9000000111,noida,NEW_PERSON,10,no_confident_match
+59,cbnexus,30,karan chopra,,9000000245,pune,NEW_PERSON,10,no_confident_match
+60,cbnexus,31,vikram mehta,,9000000261,pune,NEW_PERSON,10,no_confident_match
