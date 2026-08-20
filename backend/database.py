@@ -147,3 +147,46 @@ def get_submissions_for_person(conn, person_id):
         )
         rows = cur.fetchall()
     return [AudioSubmission.from_row(row) for row in rows]
+
+
+def get_all_submissions(conn):
+    """
+    All audio submissions across all people, newest first, joined
+    with the submitter's name/email/phone -- this is what the
+    "second view listing all submissions" (Task 3 requirement) reads
+    from. Returns a list of plain dicts rather than AudioSubmission
+    objects, since this is a joined/denormalized shape the dataclass
+    doesn't represent.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT
+                a.id, a.person_id, a.audio_path, a.duration_seconds,
+                a.sample_rate_khz, a.bitrate_kbps, a.loudness_db,
+                a.noise_score, a.created_at,
+                p.name, p.email, p.phone
+            FROM audio_submissions a
+            JOIN persons p ON p.id = a.person_id
+            ORDER BY a.created_at DESC;
+            """
+        )
+        rows = cur.fetchall()
+
+    results = []
+    for row in rows:
+        results.append({
+            "id": row[0],
+            "person_id": row[1],
+            "audio_path": row[2],
+            "duration_seconds": row[3],
+            "sample_rate_khz": row[4],
+            "bitrate_kbps": row[5],
+            "loudness_db": row[6],
+            "noise_score": row[7],
+            "created_at": row[8].isoformat() if row[8] else None,
+            "person_name": row[9],
+            "person_email": row[10],
+            "person_phone": row[11],
+        })
+    return results

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ConsultBae — Submissions Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1ef;
+    --grid-line: #dde3df;
+    --panel: #fbfcfb;
+    --ink: #17231f;
+    --ink-soft: #57645e;
+    --rec: #d8442c;
+    --rec-dim: #f0c3b8;
+    --tape: #2f7a6e;
+    --tape-dim: #cfe3df;
+    --line: #c7cfc9;
+    --rivet: #b7c0ba;
+    --focus: #1f6f9c;
+    --panel-shadow: 0 1px 0 rgba(23,35,31,0.04), 0 12px 30px -18px rgba(23,35,31,0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 100% 28px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0 / 28px 100%,
+      var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 48px 20px 80px;
+  }
+
+  .device {
+    width: 100%;
+    max-width: 760px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--panel-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .device::before, .device::after,
+  .rivet-bl, .rivet-br {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--rivet);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.25);
+  }
+  .device::before { top: 10px; left: 10px; }
+  .device::after { top: 10px; right: 10px; }
+  .rivet-bl { bottom: 10px; left: 10px; }
+  .rivet-br { bottom: 10px; right: 10px; }
+
+  .nameplate {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 22px 30px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .nameplate h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .nameplate .right {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  .nameplate .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
+
+  .nameplate a.nav-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--tape);
+    text-decoration: none;
+    border-bottom: 1px solid var(--tape-dim);
+  }
+  .nameplate a.nav-link:hover { border-bottom-color: var(--tape); }
+  .nameplate a.nav-link:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .body-pad { padding: 20px 30px 30px; }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .refresh-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 7px 12px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .refresh-btn:hover { background: #f4f6f5; }
+  .refresh-btn:focus-visible, a:focus-visible, audio:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .state-message {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    padding: 40px 10px;
+    text-align: center;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+  }
+  .state-message.error { color: var(--rec); }
+
+  .entry {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    background: repeating-linear-gradient(
+      180deg, #f4f6f5 0px, #f4f6f5 1px, transparent 1px, transparent 5px
+    );
+  }
+
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .entry-person {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  .entry-contact {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .entry-timestamp {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  audio {
+    width: 100%;
+    height: 32px;
+    margin-bottom: 12px;
+  }
+
+  .entry-metrics {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  .metric {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+  .metric .m-label {
+    display: block;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+  .metric .m-value { color: var(--ink); }
+  .metric .m-value.warn { color: var(--rec); }
+
+  @media (max-width: 560px) {
+    .entry-metrics { grid-template-columns: repeat(2, 1fr); }
+    .entry-header { flex-direction: column; }
+    .entry-timestamp { text-align: left; }
+    .nameplate { flex-direction: column; align-items: flex-start; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+  <span class="rivet-bl"></span><span class="rivet-br"></span>
+
+  <div class="nameplate">
+    <h1>ConsultBae</h1>
+    <div class="right">
+      <span class="tag">Submissions Log — Unit 02</span>
+      <a class="nav-link" href="/">+ New Intake</a>
+    </div>
+  </div>
+
+  <div class="body-pad">
+    <div class="toolbar">
+      <span class="count" id="count-label">Loading…</span>
+      <button type="button" class="refresh-btn" id="refresh-btn">Refresh</button>
+    </div>
+
+    <div id="list-container">
+      <div class="state-message" id="state-message">Loading submissions…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const API_SUBMISSIONS = "/api/submissions";
+
+  const listContainer = document.getElementById("list-container");
+  const stateMessage = document.getElementById("state-message");
+  const countLabel = document.getElementById("count-label");
+  const refreshBtn = document.getElementById("refresh-btn");
+
+  function audioUrlFor(audioPath) {
+    // audio_path is stored like "uploads/<uuid>.wav" (or with a
+    // backslash on Windows) -- the /api/audio/<filename> route only
+    // takes a bare filename, so strip any directory prefix here.
+    const parts = String(audioPath).split(/[\\/]/);
+    return `/api/audio/${encodeURIComponent(parts[parts.length - 1])}`;
+  }
+
+  function formatTimestamp(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleString(undefined, {
+      year: "numeric", month: "short", day: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+  }
+
+  function metricHtml(label, value, warn) {
+    return `
+      <div class="metric">
+        <span class="m-label">${label}</span>
+        <span class="m-value${warn ? " warn" : ""}">${value}</span>
+      </div>
+    `;
+  }
+
+  function renderEntry(s) {
+    const contactBits = [];
+    if (s.person_email) contactBits.push(s.person_email);
+    if (s.person_phone) contactBits.push(s.person_phone);
+
+    const noiseVal = s.noise_score === null || s.noise_score === undefined
+      ? "n/a" : `${s.noise_score}/100`;
+    const noiseWarn = s.noise_score !== null && s.noise_score !== undefined && s.noise_score > 50;
+
+    return `
+      <div class="entry">
+        <div class="entry-header">
+          <div>
+            <div class="entry-person">${escapeHtml(s.person_name || "Unknown")}</div>
+            <div class="entry-contact">${escapeHtml(contactBits.join(" · ") || "no contact on file")}</div>
+          </div>
+          <div class="entry-timestamp">${formatTimestamp(s.created_at)}</div>
+        </div>
+        <audio controls preload="none" src="${audioUrlFor(s.audio_path)}">
+          Your browser does not support audio playback.
+        </audio>
+        <div class="entry-metrics">
+          ${metricHtml("Duration", s.duration_seconds !== null ? `${s.duration_seconds}s` : "—")}
+          ${metricHtml("Sample Rate", s.sample_rate_khz !== null ? `${s.sample_rate_khz} kHz` : "—")}
+          ${metricHtml("Bitrate", s.bitrate_kbps !== null ? `${s.bitrate_kbps} kbps` : "—")}
+          ${metricHtml("Loudness", s.loudness_db !== null ? `${s.loudness_db} dB` : "—")}
+          ${metricHtml("Noise", noiseVal, noiseWarn)}
+        </div>
+      </div>
+    `;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function loadSubmissions() {
+    stateMessage.textContent = "Loading submissions…";
+    stateMessage.classList.remove("error");
+    listContainer.innerHTML = "";
+    listContainer.appendChild(stateMessage);
+    countLabel.textContent = "Loading…";
+
+    try {
+      const res = await fetch(API_SUBMISSIONS);
+      if (!res.ok) {
+        throw new Error(`Server responded ${res.status}`);
+      }
+      const submissions = await res.json();
+
+      if (!Array.isArray(submissions) || submissions.length === 0) {
+        stateMessage.textContent = "No submissions yet. Record one from the intake page.";
+        countLabel.textContent = "0 submissions";
+        return;
+      }
+
+      countLabel.textContent = `${submissions.length} submission${submissions.length === 1 ? "" : "s"}`;
+      listContainer.innerHTML = submissions.map(renderEntry).join("");
+    } catch (err) {
+      stateMessage.textContent = "Couldn't load submissions. Confirm the backend is running and try again.";
+      stateMessage.classList.add("error");
+      listContainer.innerHTML = "";
+      listContainer.appendChild(stateMessage);
+      countLabel.textContent = "—";
+    }
+  }
+
+  refreshBtn.addEventListener("click", loadSubmissions);
+  loadSubmissions();
+})();
+</script>
+
+</body>
+</html>

@@ -47,9 +47,49 @@ def index():
     return send_from_directory(FRONTEND_DIR, "index.html")
 
 
+@app.route("/submissions", methods=["GET"])
+def submissions_page():
+    """
+    The "second view" required by Task 3: lists every audio
+    submission across all people with a play button and the
+    extracted properties.
+    """
+    return send_from_directory(FRONTEND_DIR, "submissions.html")
+
+
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
+
+
+@app.route("/api/submissions", methods=["GET"])
+def all_submissions():
+    """All audio submissions, newest first, joined with the
+    submitter's name/email/phone. Backs the /submissions page."""
+    conn = database.get_connection()
+    try:
+        submissions = database.get_all_submissions(conn)
+    finally:
+        conn.close()
+    return jsonify(submissions)
+
+
+@app.route("/api/audio/<path:filename>", methods=["GET"])
+def serve_audio(filename):
+    """
+    Streams a stored audio file so the <audio> player on the
+    submissions list can actually play it.
+
+    Path-traversal note: we only accept a bare filename (no
+    directories) and only serve files that already exist inside
+    UPLOAD_DIR -- send_from_directory itself also refuses to resolve
+    outside its given directory, but the basename check below is a
+    second, explicit guard rather than relying solely on that.
+    """
+    safe_name = Path(filename).name
+    if safe_name != filename or not (UPLOAD_DIR / safe_name).is_file():
+        return jsonify({"error": "audio file not found"}), 404
+    return send_from_directory(UPLOAD_DIR, safe_name)
 
 
 @app.route("/api/submit", methods=["POST"])
