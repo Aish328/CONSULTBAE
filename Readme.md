@@ -2,8 +2,7 @@
 
 ## What this is
 
-Take-home submission for the ConsultBae AI Automation assignment. Four
-pieces:
+
 
 1. **Data pipeline (Task 1)** — merges 3 messy candidate/contact
    CSVs (Naukri applicants, gig workers, CBNexus contacts) into a
